@@ -1,10 +1,8 @@
 package com.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.TargetApi;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.accessibility.utils.AccessibilityLog;
 

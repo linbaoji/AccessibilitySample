@@ -1,8 +1,8 @@
 package com.accessibility.utils;
 
-        import android.util.Log;
+import android.util.Log;
 
-        import com.accessibility.BuildConfig;
+import com.accessibility.BuildConfig;
 
 /**
  * Created by popfisher on 2017/7/11.
