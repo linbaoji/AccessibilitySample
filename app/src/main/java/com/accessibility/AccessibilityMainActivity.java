@@ -21,6 +21,7 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
         mOpenSetting = findViewById(R.id.open_accessibility_setting);
         mOpenSetting.setOnClickListener(this);
         findViewById(R.id.accessibility_find_and_click).setOnClickListener(this);
+        findViewById(R.id.accessibility_sxf).setOnClickListener(this);
     }
 
     @Override
@@ -32,6 +33,14 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
                 break;
             case R.id.accessibility_find_and_click:
                 startActivity(new Intent(this, AccessibilityNormalSample.class));
+                break;
+
+            case R.id.accessibility_sxf:
+                Intent intent = new Intent();
+                //cn.vbill.operations.ad.StartUpAdvertisementActivity
+                //cn.vbill.operations.MainPlusActivity
+                intent.setClassName("com.vbill.shoushua.biz", "cn.vbill.operations.xinaliance.ThirdPayActivity");
+                startActivity(intent);
                 break;
         }
     }
