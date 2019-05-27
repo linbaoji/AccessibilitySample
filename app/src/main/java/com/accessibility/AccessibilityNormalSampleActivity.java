@@ -12,7 +12,7 @@ import com.accessibility.utils.AccessibilityLog;
  * Created by popfisher on 2017/7/10.
  */
 
-public class AccessibilityNormalSample extends Activity implements View.OnClickListener {
+public class AccessibilityNormalSampleActivity extends Activity implements View.OnClickListener {
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     @Override

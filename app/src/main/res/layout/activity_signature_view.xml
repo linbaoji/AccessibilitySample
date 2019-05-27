@@ -45,9 +45,22 @@
             android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:enabled="false"
-            android:text="保存轨迹"
+            android:text="轨迹"
             android:textColor="@color/colorAccent"
             android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/write_button"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:enabled="true"
+            android:text="辅助"
+            android:textColor="@color/colorAccent"
+            android:textSize="15sp" />
+
     </LinearLayout>
 
     <com.accessibility.views.SignatureView

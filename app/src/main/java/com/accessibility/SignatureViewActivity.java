@@ -19,6 +19,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.accessibility.utils.AccessibilityLog;
 import com.accessibility.utils.TimedPoint;
 import com.accessibility.views.SignatureView;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +39,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class SignatureViewActivity extends AppCompatActivity {
     public static final String DATABASE = "signature_list";
@@ -73,6 +74,7 @@ public class SignatureViewActivity extends AppCompatActivity {
         final Button mClearButton = (Button) findViewById(R.id.clear_button);
         final Button mSaveButton = (Button) findViewById(R.id.save_button);
         final Button mSaveJsonButton = (Button) findViewById(R.id.saven_json_button);
+        final Button mWriteButton = (Button) findViewById(R.id.write_button);
 
         final SignatureView mSignaturePad = (SignatureView) findViewById(R.id.signature_pad);
         mSignaturePad.setOnSignedListener(new SignatureView.OnSignedListener() {
@@ -114,26 +116,37 @@ public class SignatureViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // 获取SharedPreferences对象
-                SharedPreferences sp = getSharedPreferences(DATABASE, Activity.MODE_PRIVATE);
+                SharedPreferences sp = getSharedPreferences(DATABASE, Activity.MODE_MULTI_PROCESS);
                 // 获取Editor对象
                 SharedPreferences.Editor editor = sp.edit();
                 // 获取界面中的信息
                 String key = "Signature";
                 String value = null;
-                List<TimedPoint> pointList = mSignaturePad.getmPoints();
-                String jsonString  = JSONObject.toJSONString(pointList);
+                List<List<TimedPoint>> pointList = mSignaturePad.getStrokeList();
+                String jsonString = JSONArray.toJSONString(pointList);
 
-                AccessibilityLog.printLog("TimedPoint :"+jsonString);
+                AccessibilityLog.printLog("TimedPoint :" + jsonString);
 
-                value =  jsonString;
+                //List<List> strokeList = JSONArray.parseArray(jsonString,List.class);
+
+                value = jsonString;
                 editor.remove(key);
                 editor.putString(key, value);
                 editor.commit();
 
-              Map<String,Object>  map = (Map<String, Object>) sp.getAll();
 
             }
         });
+
+        mWriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AccessibilityLog.printLog("mWriteButton clicked " );
+
+            }
+        });
+
     }
 
     public File getAlbumStorageDir(String albumName) {
@@ -241,5 +254,11 @@ public class SignatureViewActivity extends AppCompatActivity {
         if (false && getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        AccessibilityLog.printLog("SignatureViewActivity onTouchEvent x " + event.getRawX() + " y" + event.getRawY());
+        return super.onTouchEvent(event);
     }
 }

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.text.TextUtils;
 
-import com.accessibility.AccessibilitySampleService;
+import com.accessibility.service.AccessibilitySampleService;
 
 /**
  * 辅助功能相关检查的帮助类

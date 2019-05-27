@@ -22,6 +22,8 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
         mOpenSetting.setOnClickListener(this);
         findViewById(R.id.accessibility_find_and_click).setOnClickListener(this);
         findViewById(R.id.accessibility_sxf).setOnClickListener(this);
+        findViewById(R.id.accessibility_signature).setOnClickListener(this);
+
     }
 
     @Override
@@ -32,7 +34,7 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
                 OpenAccessibilitySettingHelper.jumpToSettingPage(this);
                 break;
             case R.id.accessibility_find_and_click:
-                startActivity(new Intent(this, AccessibilityNormalSample.class));
+                startActivity(new Intent(this, AccessibilityNormalSampleActivity.class));
                 break;
 
             case R.id.accessibility_sxf:
@@ -42,6 +44,12 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
                 intent.setClassName("com.vbill.shoushua.biz", "cn.vbill.operations.xinaliance.ThirdPayActivity");
                 startActivity(intent);
                 break;
+
+
+            case R.id.accessibility_signature:
+                startActivity(new Intent(AccessibilityMainActivity.this,SignatureViewActivity.class));
+                break;
+
         }
     }
 }
