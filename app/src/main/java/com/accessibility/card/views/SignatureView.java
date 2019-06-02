@@ -1,4 +1,4 @@
-package com.accessibility.views;
+package com.accessibility.card.views;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -19,7 +19,7 @@ import com.accessibility.R;
 import com.accessibility.utils.AccessibilityLog;
 import com.accessibility.utils.Bezier;
 import com.accessibility.utils.ControlTimedPoints;
-import com.accessibility.utils.TimedPoint;
+import com.accessibility.card.model.TimedPoint;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;

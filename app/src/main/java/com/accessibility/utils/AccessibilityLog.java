@@ -15,4 +15,8 @@ public class AccessibilityLog {
         if (!BuildConfig.DEBUG) return;
         Log.d(TAG, logMsg);
     }
+    public static void e(Throwable e) {
+        if (!BuildConfig.DEBUG) return;
+        Log.e(TAG,e.getLocalizedMessage(), e);
+    }
 }

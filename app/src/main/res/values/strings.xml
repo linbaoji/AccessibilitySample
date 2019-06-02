@@ -1,5 +1,11 @@
 <resources>
-    <string name="app_name">Accessibility</string>
+    <string name="app_name">自动收款</string>
     <string name="accessibility_tip">开启辅助功能 SXF-PLUSH</string>
     <string name="accessibility_desc">开启辅助功能，让你的手机更智能一点</string>
+
+
+    <string name="action_settings">设置</string>
+    <string name="action_accessibility">打开辅助功能</string>
+    <string name="title_activity_add_card">推荐银行卡</string>
+
 </resources>

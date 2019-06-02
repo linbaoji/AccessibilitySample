@@ -1,4 +1,4 @@
-package com.accessibility.utils;
+package com.accessibility.card.model;
 
 public class TimedPoint {
     public float x;

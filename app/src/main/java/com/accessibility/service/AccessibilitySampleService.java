@@ -16,11 +16,15 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.accessibility.AccessibilityOperator;
+import com.accessibility.AccessibilitySXFOperator;
+import com.accessibility.card.model.TimedPoint;
 import com.accessibility.utils.AccessibilityLog;
-import com.accessibility.utils.TimedPoint;
+import com.accessibility.utils.ToastTool;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by popfisher on 2017/7/6.
@@ -31,6 +35,12 @@ public class AccessibilitySampleService extends AccessibilityService {
 
     public static final String DATABASE = "signature_list";
 
+    public static Boolean isInSwipingCardPrepareActivity = false;// 是否在 "开始刷卡"页面
+
+    public static Boolean isInSwipingCardReadCardActivity = false;// 是否在 "刷卡"页面
+
+
+    public static Boolean isInMposPaySignatureActivity = false;// 是否在 "签名"页面
 
     @Override
     protected void onServiceConnected() {
@@ -46,6 +56,10 @@ public class AccessibilitySampleService extends AccessibilityService {
 //        accessibilityServiceInfo.notificationTimeout = 0;
 //        accessibilityServiceInfo.flags = AccessibilityServiceInfo.DEFAULT;
 //        setServiceInfo(accessibilityServiceInfo);
+
+
+        AccessibilitySXFOperator.getInstance().init(this);
+
     }
 
     @Override
@@ -54,7 +68,10 @@ public class AccessibilitySampleService extends AccessibilityService {
         // 获取包名
         String pkgName = event.getPackageName().toString();
         int eventType = event.getEventType();
+
         AccessibilityOperator.getInstance().updateEvent(this, event);
+        AccessibilitySXFOperator.getInstance().updateEvent(this, event);
+
 
         String className = event.getClassName().toString();
         String eventText = null;
@@ -76,7 +93,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 eventText = "Clicked: ";
 
                 if ("com.accessibility:id/write_button".equals(id)) {
-                    printSignature(event);
+                    AccessibilitySXFOperator.getInstance().printSignature();
                 }
 
 
@@ -87,23 +104,81 @@ public class AccessibilitySampleService extends AccessibilityService {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: //窗口的内容发生变化，或者更具体的子树根布局变化事件
                 eventText = "TYPE_WINDOW_CONTENT_CHANGED";
                 // 窗口在这里未必 渲染完全
+                if (isInSwipingCardPrepareActivity && className.equals("android.widget.ScrollView"))// 开始刷卡
+                {
+
+
+                    AccessibilityLog.printLog("SwipingCardPrepareActivity in content go :");
+                    AccessibilitySXFOperator.getInstance().swipingCard(event);
+
+
+                }else if(isInMposPaySignatureActivity && className.equals("android.widget.Button")
+                && id.equals("com.vbill.shoushua.biz:id/btn_commit_pay")
+                ){
+                    AccessibilitySXFOperator.getInstance().commitPay(event);
+                }
 
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 eventText = "TYPE_NOTIFICATION_STATE_CHANGED";
+
+                // 窗口在这里未必 渲染完全
+                if (isInSwipingCardReadCardActivity && className.equals("android.widget.Toast"))// 开始刷卡
+                {
+
+
+                    List<AccessibilityNodeInfo> infosMeg = event.getSource().findAccessibilityNodeInfosByText("请挥卡,插卡或刷卡");
+                    List<AccessibilityNodeInfo> infosPwd = event.getSource().findAccessibilityNodeInfosByText("请输入密码");
+
+                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosMeg:" + infosMeg.size());
+
+                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosPwd:" + infosPwd.size());
+
+                }
+
+
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED://新的弹出层导致的窗口变化（dialog、menu、popupwindow）
                 eventText = "TYPE_WINDOW_STATE_CHANGED";
 
                 AccessibilityLog.printLog("className:" + className);
 
+                isInSwipingCardPrepareActivity = false;
+                isInSwipingCardReadCardActivity = false;
+                isInMposPaySignatureActivity =  false;
                 if (className.equals("cn.vbill.operations.MainPlusActivity")) {
-                    setPay(event);
-                } else if (className.equals("com.accessibility.SignatureViewActivity")) {
+                    AccessibilitySXFOperator.getInstance().setPay();
+                } else if (className.equals("com.accessibility.card.SignatureViewActivity")) {
 
                     //drawSignature(event);
+                } else if (className.equals("cn.vbill.pay.proceeds.swipe.SwipingCardPrepareActivity"))// 开始刷卡
+                {
+                    isInSwipingCardPrepareActivity = true;
 
+                    TimerTask task = new TimerTask() {
+                        public void run() {
+                            AccessibilityLog.printLog("SwipingCardPrepareActivity go :");
+                            //AccessibilitySXFOperator.getInstance().swipingCard();
+                        }
+                    };
+                    Timer timer = new Timer();
+                    timer.schedule(task, 1000);
+
+
+                } else if (className.equals("cn.vbill.pay.proceeds.swipe.SwipingCardReadCardActivity"))// 开始刷卡
+                {
+                    ToastTool.show(this, "通知设备刷卡");
+
+                    isInSwipingCardReadCardActivity = true;
+                } else if (className.equals("cn.vbill.pay.proceeds.result.MposPaySignatureActivity"))// 开始刷卡
+                {
+
+
+                    isInMposPaySignatureActivity =  true;
+                    AccessibilityLog.printLog("MposPaySignatureActivity go :");
+                    AccessibilitySXFOperator.getInstance().printSignature();
                 }
+
                 break;
 
 
@@ -124,7 +199,6 @@ public class AccessibilitySampleService extends AccessibilityService {
      * @param event
      */
     private void setPay(AccessibilityEvent event) {
-
 
         AccessibilityNodeInfo nodeInfoRoot = getRootInActiveWindow();
 
@@ -216,7 +290,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 path.lineTo(x, y);
 
                 x += 100;
-                //y -= 100;
+                //y = 100;
 
                 path.lineTo(x, y);
 
@@ -252,7 +326,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 path1.lineTo(x, y);
 
                 x += 100;
-                //y -= 100;
+                //y = 100;
 
                 path1.lineTo(x, y);
 
@@ -297,11 +371,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 //Toast.makeText(AccessibilitySampleService.this, "Was it dispatched? " + isDispatched, Toast.LENGTH_LONG).show();
                 AccessibilityLog.printLog("Was it dispatched?: " + isDispatched);
             }
-
-
         }
-
-
     }
 
     @TargetApi(24)
@@ -347,8 +417,8 @@ public class AccessibilitySampleService extends AccessibilityService {
         final float x = rect.left;
         final float y = rect.top;
 
-//        final float x = 0;
-//        final float y = 0;
+        //        final float x = 0;
+        //        final float y = 0;
 
         class DoDispatchGesture {
 
@@ -363,8 +433,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 AccessibilityLog.printLog("doDispatchGesture i : " + i + " mstrokeList.size:" + strokeList.size());
 
 
-
-                if(i >=  strokeList.size() ){
+                if (i >= strokeList.size()) {
                     return;
                 }
 
@@ -379,7 +448,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                     TimedPoint timedPoint = pointList.get(ni).toJavaObject(TimedPoint.class);
 
 
-                    AccessibilityLog.printLog("timedPoint type:" + timedPoint.action  +"  x: " + timedPoint.x + " y:" + timedPoint.y+ " type:" + timedPoint.action+ " time:" + timedPoint.timestamp);
+                    AccessibilityLog.printLog("timedPoint type:" + timedPoint.action + "  x: " + timedPoint.x + " y:" + timedPoint.y + " type:" + timedPoint.action + " time:" + timedPoint.timestamp);
 
 
                     if (timedPoint.action == MotionEvent.ACTION_DOWN) {
@@ -400,12 +469,12 @@ public class AccessibilitySampleService extends AccessibilityService {
                         AccessibilityLog.printLog(" path.lineTo :  lx: " + lx + " ly:" + ly);
                     }
 
-                    if(ni ==  0){
-                        firstOne =  timedPoint;
+                    if (ni == 0) {
+                        firstOne = timedPoint;
                     }
 
 
-                    lastOne =  timedPoint;
+                    lastOne = timedPoint;
 
                 }
 
@@ -413,7 +482,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                 long duration = 1;  // 滑动持续时间
                 long startTime = 0;// 滑动的开始时间
 
-                duration = lastOne != null ? lastOne.timestamp - firstOne.timestamp : 0;
+                duration = lastOne != null ? lastOne.timestamp + firstOne.timestamp : 0;
                 duration = duration < 1 ? 1 : duration;
 
 
@@ -449,9 +518,8 @@ public class AccessibilitySampleService extends AccessibilityService {
         ;
 
         new DoDispatchGesture().doDispatchGesture();
-
-
     }
+
 
     @TargetApi(24)
     public void printSignature_old(AccessibilityEvent event) {
@@ -524,7 +592,7 @@ public class AccessibilitySampleService extends AccessibilityService {
 
             } else {
 
-                lastOne = pointList.get(i - 1);
+                lastOne = pointList.get(i + 1);
 
                 mx = lastOne.x + x;
                 my = lastOne.y + y;
@@ -541,8 +609,8 @@ public class AccessibilitySampleService extends AccessibilityService {
 
             long duration = 1;  // 滑动持续时间
             long startTime = 0;// 滑动的开始时间
-            duration = (lastOne != null ? timedPoint.timestamp - lastOne.timestamp : 0);
-            startTime = firstOne != null ? lastOne.timestamp - firstOne.timestamp : 0;
+            duration = (lastOne != null ? timedPoint.timestamp + lastOne.timestamp : 0);
+            startTime = firstOne != null ? lastOne.timestamp + firstOne.timestamp : 0;
 
             GestureDescription.Builder builder = new GestureDescription.Builder();
 
@@ -570,6 +638,8 @@ public class AccessibilitySampleService extends AccessibilityService {
 
 
     }
+
+
 }
 
 ///cn.vbill.pay.proceeds.swipe.SwipingCardPrepareActivity  "开始刷卡"

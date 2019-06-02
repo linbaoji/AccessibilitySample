@@ -1,4 +1,4 @@
-package com.accessibility;
+package com.accessibility.card;
 
 import android.Manifest;
 import android.app.Activity;
@@ -24,11 +24,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.accessibility.R;
+import com.accessibility.card.model.TimedPoint;
+import com.accessibility.card.views.SignatureView;
 import com.accessibility.utils.AccessibilityLog;
-import com.accessibility.utils.TimedPoint;
-import com.accessibility.views.SignatureView;
+
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +42,6 @@ import java.util.Date;
 import java.util.List;
 
 public class SignatureViewActivity extends AppCompatActivity {
-    public static final String DATABASE = "signature_list";
 
     private String creatTime;
 
@@ -83,6 +83,7 @@ public class SignatureViewActivity extends AppCompatActivity {
                 mSaveButton.setEnabled(true);
                 mClearButton.setEnabled(true);
                 mSaveJsonButton.setEnabled(true);
+                mWriteButton.setEnabled(true);
             }
 
             @Override
@@ -90,6 +91,7 @@ public class SignatureViewActivity extends AppCompatActivity {
                 mSaveButton.setEnabled(false);
                 mClearButton.setEnabled(false);
                 mSaveJsonButton.setEnabled(false);
+                mWriteButton.setEnabled(false);
             }
         });
 
@@ -115,24 +117,28 @@ public class SignatureViewActivity extends AppCompatActivity {
         mSaveJsonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 获取SharedPreferences对象
-                SharedPreferences sp = getSharedPreferences(DATABASE, Activity.MODE_MULTI_PROCESS);
-                // 获取Editor对象
-                SharedPreferences.Editor editor = sp.edit();
-                // 获取界面中的信息
-                String key = "Signature";
-                String value = null;
+//                // 获取SharedPreferences对象
+//                SharedPreferences sp = getSharedPreferences(getResources().getString(R.string.database_name), Activity.MODE_MULTI_PROCESS);
+//                // 获取Editor对象
+//                SharedPreferences.Editor editor = sp.edit();
+//                // 获取界面中的信息
+//                String key = "Signature";
+//                String value = null;
                 List<List<TimedPoint>> pointList = mSignaturePad.getStrokeList();
                 String jsonString = JSONArray.toJSONString(pointList);
 
                 AccessibilityLog.printLog("TimedPoint :" + jsonString);
 
-                //List<List> strokeList = JSONArray.parseArray(jsonString,List.class);
+                setResult(1, new Intent().putExtra("pointList", jsonString));
+                finish();
 
-                value = jsonString;
-                editor.remove(key);
-                editor.putString(key, value);
-                editor.commit();
+
+                //List<List> strokeList = JSONArray.parseArray(jsonString,List.class);
+//
+//                value = jsonString;
+//                editor.remove(key);
+//                editor.putString(key, value);
+//                editor.commit();
 
 
             }

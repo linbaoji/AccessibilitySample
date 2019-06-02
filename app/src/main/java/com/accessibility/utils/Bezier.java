@@ -1,5 +1,7 @@
 package com.accessibility.utils;
 
+import com.accessibility.card.model.TimedPoint;
+
 public class Bezier {
 
 	public TimedPoint startPoint;

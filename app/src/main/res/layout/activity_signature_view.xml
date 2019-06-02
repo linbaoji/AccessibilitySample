@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.accessibility.SignatureViewActivity">
+    tools:context="com.accessibility.card.SignatureViewActivity">
 
     <LinearLayout
         android:id="@+id/buttons_container"
@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:text="清除"
-            android:textColor="@color/colorAccent"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:textSize="15sp" />
 
         <Button
@@ -34,7 +34,8 @@
             android:layout_weight="1"
             android:enabled="false"
             android:text="保存"
-            android:textColor="@color/colorAccent"
+            android:visibility="gone"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:textSize="15sp" />
 
         <Button
@@ -45,8 +46,8 @@
             android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:enabled="false"
-            android:text="轨迹"
-            android:textColor="@color/colorAccent"
+            android:text="确认"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:textSize="15sp" />
 
         <Button
@@ -56,14 +57,14 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="20dp"
             android:layout_weight="1"
-            android:enabled="true"
-            android:text="辅助"
-            android:textColor="@color/colorAccent"
+            android:enabled="false"
+            android:text="预览"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:textSize="15sp" />
 
     </LinearLayout>
 
-    <com.accessibility.views.SignatureView
+    <com.accessibility.card.views.SignatureView
         android:id="@+id/signature_pad"
         android:layout_width="fill_parent"
         android:layout_height="0dp"

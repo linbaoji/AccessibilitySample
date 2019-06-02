@@ -1,5 +1,7 @@
 package com.accessibility.utils;
 
+import com.accessibility.card.model.TimedPoint;
+
 /**
  * Created by gcacace on 28/02/14.
  */

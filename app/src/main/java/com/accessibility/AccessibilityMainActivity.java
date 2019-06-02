@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.accessibility.card.CardListActivity;
+import com.accessibility.card.SignatureViewActivity;
+
 public class AccessibilityMainActivity extends Activity implements View.OnClickListener {
 
     private View mOpenSetting;
@@ -14,6 +17,7 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accessibility_main);
         initView();
+
         AccessibilityOperator.getInstance().init(this);
     }
 
@@ -23,6 +27,8 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
         findViewById(R.id.accessibility_find_and_click).setOnClickListener(this);
         findViewById(R.id.accessibility_sxf).setOnClickListener(this);
         findViewById(R.id.accessibility_signature).setOnClickListener(this);
+
+        findViewById(R.id.accessibility_card).setOnClickListener(this);
 
     }
 
@@ -47,7 +53,10 @@ public class AccessibilityMainActivity extends Activity implements View.OnClickL
 
 
             case R.id.accessibility_signature:
-                startActivity(new Intent(AccessibilityMainActivity.this,SignatureViewActivity.class));
+                startActivity(new Intent(AccessibilityMainActivity.this, SignatureViewActivity.class));
+                break;
+            case R.id.accessibility_card:
+                startActivity(new Intent(AccessibilityMainActivity.this, CardListActivity.class));
                 break;
 
         }
