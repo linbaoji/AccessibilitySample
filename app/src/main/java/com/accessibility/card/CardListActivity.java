@@ -42,24 +42,12 @@ public class CardListActivity extends AppCompatActivity implements CardsAdapter.
     private int pos;
 
 
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
-    private String actionDataKey;//action_data_key
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeVies();
         displayList();
-
-
-        //获取SharedPreferences对象
-        sp = getSharedPreferences(Constants.SHARE_PREFERENCES_DATABASE_NAME, Activity.MODE_MULTI_PROCESS);
-        // 获取Editor对象
-        editor = sp.edit();
-
-        actionDataKey = Constants.SHARE_PREFERENCES_DATA_KEY;
 
 
         String payState = getIntent().getStringExtra("patState");
@@ -163,12 +151,9 @@ public class CardListActivity extends AppCompatActivity implements CardsAdapter.
                             case 2:
                                 CardListActivity.this.pos = pos;
                                 Card card = cards.get(pos);
+                                card.setState(1);
 
-                                String jsonString = JSONArray.toJSONString(card);
-
-                                editor.remove(actionDataKey);
-                                editor.putString(actionDataKey, jsonString);
-                                editor.commit();
+                                cardDatabase.getCardDao().updateCard(card);
 
                                 Intent intent = new Intent();
                                 //cn.vbill.operations.ad.StartUpAdvertisementActivity
@@ -178,7 +163,7 @@ public class CardListActivity extends AppCompatActivity implements CardsAdapter.
 
 
 
-                                AccessibilityLog.printLog("CardList" + "开始收款 ： " +jsonString);
+                                AccessibilityLog.printLog("CardList" + "开始收款 ： ");
 
 
                                 break;

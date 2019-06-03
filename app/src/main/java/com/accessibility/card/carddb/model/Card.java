@@ -41,6 +41,10 @@ public class Card implements Serializable {
 
     private Date date;
 
+    /**
+     * 1 表示收款中
+     * 0 表示 一般状态
+     */
     private Integer state;
 
     public Card(String number, String bank, String cardType, String holder, String password, Integer payment, Float poundage, String signature, Date date) {

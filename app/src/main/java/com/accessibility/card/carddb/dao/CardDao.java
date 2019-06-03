@@ -21,6 +21,10 @@ public interface CardDao {
     @Query("SELECT * FROM " + Constants.TABLE_NAME_CARDS)
     List<Card> getCards();
 
+    @Query("SELECT * FROM " + Constants.TABLE_NAME_CARDS + " WHERE STATE = 1")
+    List<Card> getState1Cards();
+
+
     /*
      * Insert the object in database
      * @param Card, object to be inserted

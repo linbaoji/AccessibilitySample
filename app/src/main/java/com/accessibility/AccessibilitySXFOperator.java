@@ -18,6 +18,8 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.accessibility.card.CardListActivity;
+import com.accessibility.card.carddb.CardDatabase;
 import com.accessibility.card.carddb.model.Card;
 import com.accessibility.card.model.TimedPoint;
 import com.accessibility.utils.AccessibilityLog;
@@ -42,10 +44,7 @@ public class AccessibilitySXFOperator {
     private Card card;
 
 
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
-    private String actionDataKey;//action_data_key
-
+    private CardDatabase cardDatabase;
 
     private AccessibilitySXFOperator() {
 
@@ -59,14 +58,7 @@ public class AccessibilitySXFOperator {
     public void init(Context context) {
         mContext = context;
 
-        //获取SharedPreferences对象
-        sp = context.getSharedPreferences(Constants.SHARE_PREFERENCES_DATABASE_NAME, Activity.MODE_MULTI_PROCESS);
-        // 获取Editor对象
-        editor = sp.edit();
-
-        actionDataKey = Constants.SHARE_PREFERENCES_DATA_KEY;
-
-        AccessibilityLog.printLog("AccessibilitySXFOperator.init: " + actionDataKey);
+        cardDatabase = CardDatabase.getInstance(context);
 
 
     }
@@ -183,15 +175,17 @@ public class AccessibilitySXFOperator {
      */
     public void setPay() {
 
+        List<Card>  cards =  cardDatabase.getCardDao().getState1Cards();
 
-        String jsonString = sp.getString(actionDataKey, "");
+        //AccessibilityLog.printLog("card :" + jsonString);
 
-        AccessibilityLog.printLog("开始收款 setPay card :" + jsonString);
-
-        if (jsonString == null || "".equals(jsonString)) {
+        if (cards ==  null || cards.size() ==0) {
             return;
         }
-        card = JSONObject.parseObject(jsonString, Card.class);
+        card = cards.get(0);
+
+
+        AccessibilityLog.printLog("开始收款 setPay cards.size :" + cards.size());
 
 
         AccessibilityNodeInfo nodeInfoRoot = getRootNodeInfo();
@@ -257,17 +251,17 @@ public class AccessibilitySXFOperator {
         //com.vbill.shoushua.biz:id/btn_up_sig
         //com.vbill.shoushua.biz:id/btn_commit_pay
 
-        String jsonString = sp.getString(actionDataKey, "");
+        List<Card>  cards =  cardDatabase.getCardDao().getState1Cards();
 
         //AccessibilityLog.printLog("card :" + jsonString);
 
-        if (jsonString == null || "".equals(jsonString)) {
+        if (cards ==  null || cards.size() ==0) {
             return;
         }
-        card = JSONObject.parseObject(jsonString, Card.class);
+        card = cards.get(0);
 
 
-        jsonString = card.getSignature();
+        String jsonString = card.getSignature();
 
         //AccessibilityLog.printLog("TimedPoint :" + jsonString);
 
@@ -481,10 +475,8 @@ public class AccessibilitySXFOperator {
 
             ToastTool.show(mContext,item.getText().toString());
 
-            //清除当前付款情况
-            editor.remove(actionDataKey);
-            editor.commit();
-
+            card.setState(0);
+            cardDatabase.getCardDao().updateCard(card);
 
             //com.vbill.shoushua.biz:id/ll_back_pay_prepare  返回收款页
             //com.vbill.shoushua.biz:id/ll_look_pay_result 查看交易记录
