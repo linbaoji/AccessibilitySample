@@ -103,18 +103,27 @@ public class AccessibilitySampleService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: //窗口的内容发生变化，或者更具体的子树根布局变化事件
                 eventText = "TYPE_WINDOW_CONTENT_CHANGED";
+
+                AccessibilityLog.printLog("typeWindwoContentChanged Prepare: " + isInSwipingCardPrepareActivity + " Read: " + isInSwipingCardReadCardActivity + "  MposPaySignature: " + isInMposPaySignatureActivity);
+
                 // 窗口在这里未必 渲染完全
+                // 在"准备刷卡"页面 ，点击 开始刷卡
                 if (isInSwipingCardPrepareActivity && className.equals("android.widget.ScrollView"))// 开始刷卡
                 {
-
-
                     AccessibilityLog.printLog("SwipingCardPrepareActivity in content go :");
                     AccessibilitySXFOperator.getInstance().swipingCard(event);
 
 
-                }else if(isInMposPaySignatureActivity && className.equals("android.widget.Button")
-                && id.equals("com.vbill.shoushua.biz:id/btn_commit_pay")
-                ){
+                } else if (isInSwipingCardReadCardActivity && className.equals("android.widget.TextView")
+                        && id.equals("com.vbill.shoushua.biz:id/tv_read_card_title")
+                ) {
+
+                    AccessibilityLog.printLog("CardPrepare content change   BeforeText :" + event.getBeforeText() + "  text :" + event.getText());
+
+                } else if (isInMposPaySignatureActivity && className.equals("android.widget.Button")
+                        && id.equals("com.vbill.shoushua.biz:id/btn_commit_pay") && event.isEnabled()
+                ) {
+                    //  在签名页面 当"提交完成" 按钮改变为可用状态时点击次按钮
                     AccessibilitySXFOperator.getInstance().commitPay(event);
                 }
 
@@ -122,17 +131,30 @@ public class AccessibilitySampleService extends AccessibilityService {
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 eventText = "TYPE_NOTIFICATION_STATE_CHANGED";
 
-                // 窗口在这里未必 渲染完全
-                if (isInSwipingCardReadCardActivity && className.equals("android.widget.Toast"))// 开始刷卡
+                AccessibilityLog.printLog("typeNotificationStateChange Prepare: " + isInSwipingCardPrepareActivity + " Read: " + isInSwipingCardReadCardActivity + "  MposPaySignature: " + isInMposPaySignatureActivity);
+
+
+                // 在刷卡页面 分析是当前post机的操作状态
+                if (isInSwipingCardReadCardActivity && className.equals("android.widget.Toast$TN"))// 开始刷卡
                 {
+                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosMeg:" +event.getText());
 
+                    if("[请挥卡，插卡或刷卡]".equals(event.getText().toString()))
+                    {
+                        ToastTool.show(this,"#######################请你刷卡");
+                    }else
+                        if("[请输入密码]".equals(event.getText().toString())){
 
-                    List<AccessibilityNodeInfo> infosMeg = event.getSource().findAccessibilityNodeInfosByText("请挥卡,插卡或刷卡");
-                    List<AccessibilityNodeInfo> infosPwd = event.getSource().findAccessibilityNodeInfosByText("请输入密码");
+                            ToastTool.show(this,"#######################请输入密码");
 
-                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosMeg:" + infosMeg.size());
+                        }
 
-                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosPwd:" + infosPwd.size());
+//                    List<AccessibilityNodeInfo> infosMeg = event.getSource().findAccessibilityNodeInfosByText("请挥卡,插卡或刷卡");
+//                    List<AccessibilityNodeInfo> infosPwd = event.getSource().findAccessibilityNodeInfosByText("请输入密码");
+//
+//                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosMeg:" + infosMeg.size() + "  请挥卡,插卡或刷卡");
+//
+//                    AccessibilityLog.printLog("SwipingCardPrepareActivity notification_state   infosPwd:" + infosPwd.size() + "  请输入密码");
 
                 }
 
@@ -143,9 +165,7 @@ public class AccessibilitySampleService extends AccessibilityService {
 
                 AccessibilityLog.printLog("className:" + className);
 
-                isInSwipingCardPrepareActivity = false;
-                isInSwipingCardReadCardActivity = false;
-                isInMposPaySignatureActivity =  false;
+                // 加入 随行付 首页，填写刷卡金额
                 if (className.equals("cn.vbill.operations.MainPlusActivity")) {
                     AccessibilitySXFOperator.getInstance().setPay();
                 } else if (className.equals("com.accessibility.card.SignatureViewActivity")) {
@@ -154,11 +174,15 @@ public class AccessibilitySampleService extends AccessibilityService {
                 } else if (className.equals("cn.vbill.pay.proceeds.swipe.SwipingCardPrepareActivity"))// 开始刷卡
                 {
                     isInSwipingCardPrepareActivity = true;
+                    isInSwipingCardReadCardActivity = false;
+                    isInMposPaySignatureActivity = false;
 
+
+                    // 准备刷卡页面会有个加载过程，要等页面加载完成，才能点击刷卡按钮
                     TimerTask task = new TimerTask() {
                         public void run() {
                             AccessibilityLog.printLog("SwipingCardPrepareActivity go :");
-                            //AccessibilitySXFOperator.getInstance().swipingCard();
+                           // AccessibilitySXFOperator.getInstance().swipingCard(event);
                         }
                     };
                     Timer timer = new Timer();
@@ -169,14 +193,24 @@ public class AccessibilitySampleService extends AccessibilityService {
                 {
                     ToastTool.show(this, "通知设备刷卡");
 
+
+                    isInSwipingCardPrepareActivity = false;
                     isInSwipingCardReadCardActivity = true;
-                } else if (className.equals("cn.vbill.pay.proceeds.result.MposPaySignatureActivity"))// 开始刷卡
+                    isInMposPaySignatureActivity = false;
+                } else if (className.equals("cn.vbill.pay.proceeds.result.MposPaySignatureActivity"))// 签名
                 {
 
+                    // 签名页面
+                    isInSwipingCardPrepareActivity = false;
+                    isInSwipingCardReadCardActivity = false;
+                    isInMposPaySignatureActivity = true;
 
-                    isInMposPaySignatureActivity =  true;
+
                     AccessibilityLog.printLog("MposPaySignatureActivity go :");
                     AccessibilitySXFOperator.getInstance().printSignature();
+                }else if(className.equals("cn.vbill.pay.proceeds.result.MposPayXResultActivity")){
+                    //处理付款结果
+                    AccessibilitySXFOperator.getInstance().processResult();
                 }
 
                 break;
@@ -412,7 +446,7 @@ public class AccessibilitySampleService extends AccessibilityService {
         signaturePad.getBoundsInScreen(rect);
 
 
-        AccessibilityLog.printLog(" signaturePad.getBoundsInScreen(rect) x:" + rect.left + " y:" + rect.top);
+        //AccessibilityLog.printLog(" signaturePad.getBoundsInScreen(rect) x:" + rect.left + " y:" + rect.top);
 
         final float x = rect.left;
         final float y = rect.top;
@@ -430,7 +464,7 @@ public class AccessibilitySampleService extends AccessibilityService {
 
             public void doDispatchGesture() {
 
-                AccessibilityLog.printLog("doDispatchGesture i : " + i + " mstrokeList.size:" + strokeList.size());
+                //AccessibilityLog.printLog("doDispatchGesture i : " + i + " mstrokeList.size:" + strokeList.size());
 
 
                 if (i >= strokeList.size()) {
@@ -448,7 +482,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                     TimedPoint timedPoint = pointList.get(ni).toJavaObject(TimedPoint.class);
 
 
-                    AccessibilityLog.printLog("timedPoint type:" + timedPoint.action + "  x: " + timedPoint.x + " y:" + timedPoint.y + " type:" + timedPoint.action + " time:" + timedPoint.timestamp);
+                    //AccessibilityLog.printLog("timedPoint type:" + timedPoint.action + "  x: " + timedPoint.x + " y:" + timedPoint.y + " type:" + timedPoint.action + " time:" + timedPoint.timestamp);
 
 
                     if (timedPoint.action == MotionEvent.ACTION_DOWN) {
@@ -458,7 +492,7 @@ public class AccessibilitySampleService extends AccessibilityService {
 
                         path.moveTo(mx, my);
 
-                        AccessibilityLog.printLog(" path.moveTo :  mx: " + mx + " my:" + my);
+                        //AccessibilityLog.printLog(" path.moveTo :  mx: " + mx + " my:" + my);
 
 
                     } else {
@@ -466,7 +500,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                         float ly = timedPoint.y + y;
 
                         path.lineTo(lx, ly);
-                        AccessibilityLog.printLog(" path.lineTo :  lx: " + lx + " ly:" + ly);
+                        //AccessibilityLog.printLog(" path.lineTo :  lx: " + lx + " ly:" + ly);
                     }
 
                     if (ni == 0) {

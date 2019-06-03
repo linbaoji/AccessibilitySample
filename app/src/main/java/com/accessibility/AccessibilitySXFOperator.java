@@ -8,6 +8,7 @@ import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -21,6 +22,7 @@ import com.accessibility.card.carddb.model.Card;
 import com.accessibility.card.model.TimedPoint;
 import com.accessibility.utils.AccessibilityLog;
 import com.accessibility.utils.Constants;
+import com.accessibility.utils.ToastTool;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -184,7 +186,7 @@ public class AccessibilitySXFOperator {
 
         String jsonString = sp.getString(actionDataKey, "");
 
-        AccessibilityLog.printLog("card :" + jsonString);
+        AccessibilityLog.printLog("开始收款 setPay card :" + jsonString);
 
         if (jsonString == null || "".equals(jsonString)) {
             return;
@@ -255,10 +257,19 @@ public class AccessibilitySXFOperator {
         //com.vbill.shoushua.biz:id/btn_up_sig
         //com.vbill.shoushua.biz:id/btn_commit_pay
 
+        String jsonString = sp.getString(actionDataKey, "");
 
-        String jsonString = card.getSignature();
+        //AccessibilityLog.printLog("card :" + jsonString);
 
-        AccessibilityLog.printLog("TimedPoint :" + jsonString);
+        if (jsonString == null || "".equals(jsonString)) {
+            return;
+        }
+        card = JSONObject.parseObject(jsonString, Card.class);
+
+
+        jsonString = card.getSignature();
+
+        //AccessibilityLog.printLog("TimedPoint :" + jsonString);
 
         final List<List> strokeList = JSONObject.parseArray(jsonString, List.class);
 
@@ -286,7 +297,7 @@ public class AccessibilitySXFOperator {
         signaturePad.getBoundsInScreen(rect);
 
 
-        AccessibilityLog.printLog(" signaturePad.getBoundsInScreen(rect) x:" + rect.left + " y:" + rect.top);
+        //AccessibilityLog.printLog(" signaturePad.getBoundsInScreen(rect) x:" + rect.left + " y:" + rect.top);
 
         final float x = rect.left;
         final float y = rect.top;
@@ -324,7 +335,7 @@ public class AccessibilitySXFOperator {
                     TimedPoint timedPoint = pointList.get(ni).toJavaObject(TimedPoint.class);
 
 
-                    AccessibilityLog.printLog("timedPoint type:" + timedPoint.action + "  x: " + timedPoint.x + " y:" + timedPoint.y + " type:" + timedPoint.action + " time:" + timedPoint.timestamp);
+                    //AccessibilityLog.printLog("timedPoint type:" + timedPoint.action + "  x: " + timedPoint.x + " y:" + timedPoint.y + " type:" + timedPoint.action + " time:" + timedPoint.timestamp);
 
 
                     if (timedPoint.action == MotionEvent.ACTION_DOWN) {
@@ -334,7 +345,7 @@ public class AccessibilitySXFOperator {
 
                         path.moveTo(mx, my);
 
-                        AccessibilityLog.printLog(" path.moveTo :  mx: " + mx + " my:" + my);
+                        //AccessibilityLog.printLog(" path.moveTo :  mx: " + mx + " my:" + my);
 
 
                     } else {
@@ -342,7 +353,7 @@ public class AccessibilitySXFOperator {
                         float ly = timedPoint.y + y;
 
                         path.lineTo(lx, ly);
-                        AccessibilityLog.printLog(" path.lineTo :  lx: " + lx + " ly:" + ly);
+                        //AccessibilityLog.printLog(" path.lineTo :  lx: " + lx + " ly:" + ly);
                     }
 
                     if (ni == 0) {
@@ -366,7 +377,7 @@ public class AccessibilitySXFOperator {
 
                 GestureDescription.StrokeDescription strokeDescription = new GestureDescription.StrokeDescription(path, startTime, duration);
 
-                AccessibilityLog.printLog("builder.addStroke :  startTime: " + startTime + " duration:" + duration);
+                //AccessibilityLog.printLog("builder.addStroke :  startTime: " + startTime + " duration:" + duration);
 
 
                 builder.addStroke(strokeDescription);
@@ -379,7 +390,7 @@ public class AccessibilitySXFOperator {
                     public void onCompleted(GestureDescription gestureDescription) {
                         super.onCompleted(gestureDescription);
 
-                        AccessibilityLog.printLog("dispatchGesture:onCompleted i:" + i);
+                        //AccessibilityLog.printLog("dispatchGesture:onCompleted i:" + i);
 
                         i++;
                         doDispatchGesture();
@@ -388,7 +399,7 @@ public class AccessibilitySXFOperator {
 
 
                 //Toast.makeText(AccessibilitySampleService.this, "Was it dispatched? " + isDispatched, Toast.LENGTH_LONG).show();
-                AccessibilityLog.printLog("Was it dispatched?: " + isDispatched);
+                //AccessibilityLog.printLog("Was it dispatched?: " + isDispatched);
             }
         }
         ;
@@ -440,18 +451,66 @@ public class AccessibilitySXFOperator {
         //知道了
         List<AccessibilityNodeInfo> infos = getRootNodeInfo().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/btn_up_sig");
 
-        AccessibilityLog.printLog("infos :" + infos.size());
+        AccessibilityLog.printLog("upLoadSignature infos :" + infos.size());
 
         for (AccessibilityNodeInfo item : infos) {
-            AccessibilityLog.printLog("infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName());
+            AccessibilityLog.printLog("upLoadSignature infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName());
 
-            item.performAction(AccessibilityNodeInfo.ACTION_PASTE);
+            item.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 
 
         }
     }
 
     public  void  commitPay(AccessibilityEvent event){
-        event.getSource().performAction(AccessibilityNodeInfo.ACTION_PASTE);
+        AccessibilityLog.printLog("commitPay infos :" + event.getSource().getViewIdResourceName());
+
+        event.getSource().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+    }
+
+    public void processResult() {
+
+        List<AccessibilityNodeInfo> infos  = getRootNodeInfo().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/tv_pay_result_title");
+        AccessibilityLog.printLog("processResult infos :" + infos.size());
+
+        for (AccessibilityNodeInfo item : infos) {
+            AccessibilityLog.printLog("processResult infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName() +" text : "+ item
+            .getText());
+
+
+
+            ToastTool.show(mContext,item.getText().toString());
+
+            //清除当前付款情况
+            editor.remove(actionDataKey);
+            editor.commit();
+
+
+            //com.vbill.shoushua.biz:id/ll_back_pay_prepare  返回收款页
+            //com.vbill.shoushua.biz:id/ll_look_pay_result 查看交易记录
+
+
+            // 返回卡管理
+            Intent intent = new Intent();
+            //cn.vbill.operations.ad.StartUpAdvertisementActivity
+            //cn.vbill.operations.MainPlusActivity
+            intent.setClassName(mContext.getPackageName(), "com.accessibility.card.CardListActivity");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if(item.getText().equals("交易成功")){
+
+
+                intent.putExtra("patState","succ");
+
+
+            }else{
+
+
+                intent.putExtra("patState","fail");
+            }
+
+            mContext.startActivity(intent);
+
+        }
     }
 }

@@ -41,6 +41,8 @@ public class Card implements Serializable {
 
     private Date date;
 
+    private Integer state;
+
     public Card(String number, String bank, String cardType, String holder, String password, Integer payment, Float poundage, String signature, Date date) {
         //this.card_id = card_id;
         this.bank = bank;
@@ -130,6 +132,14 @@ public class Card implements Serializable {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
 
     public String getCardType() {

@@ -11,12 +11,12 @@ public class ToastTool {
     private static Toast mToast;
     public static void show(final Context context, final String msg) {
         if (mToast == null) {
-            View v = Toast.makeText(context, "", Toast.LENGTH_SHORT).getView();
+            View v = Toast.makeText(context, "", Toast.LENGTH_LONG).getView();
             mToast = new Toast(context);
             mToast.setView(v);
         }
         mToast.setText(msg);
-        mToast.setDuration(Toast.LENGTH_SHORT);
+        mToast.setDuration(Toast.LENGTH_LONG);
         mToast.show();
 
 

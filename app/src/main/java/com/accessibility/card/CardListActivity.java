@@ -23,7 +23,9 @@ import com.accessibility.R;
 import com.accessibility.card.adapter.CardsAdapter;
 import com.accessibility.card.carddb.CardDatabase;
 import com.accessibility.card.carddb.model.Card;
+import com.accessibility.utils.AccessibilityLog;
 import com.accessibility.utils.Constants;
+import com.accessibility.utils.ToastTool;
 import com.alibaba.fastjson.JSONArray;
 
 import java.lang.ref.WeakReference;
@@ -58,6 +60,18 @@ public class CardListActivity extends AppCompatActivity implements CardsAdapter.
         editor = sp.edit();
 
         actionDataKey = Constants.SHARE_PREFERENCES_DATA_KEY;
+
+
+        String payState = getIntent().getStringExtra("patState");
+        if(payState!=null && payState.equals("succ")){
+            ToastTool.show(this,"收款成功");
+
+            AccessibilityLog.printLog("CardList" + "收款成功");
+        }else if(payState!=null && payState.equals("fail")){
+            ToastTool.show(this,"收款失败");
+
+            AccessibilityLog.printLog("CardList" + "收款失败");
+        }
 
     }
 
@@ -163,6 +177,8 @@ public class CardListActivity extends AppCompatActivity implements CardsAdapter.
                                 startActivity(intent);
 
 
+
+                                AccessibilityLog.printLog("CardList" + "开始收款 ： " +jsonString);
 
 
                                 break;
