@@ -120,11 +120,10 @@ public class AccessibilitySampleService extends AccessibilityService {
 
                     AccessibilityLog.printLog("CardPrepare content change   BeforeText :" + event.getBeforeText() + "  text :" + event.getText());
 
-                } else if (isInMposPaySignatureActivity && className.equals("android.widget.Button")
-                        && id.equals("com.vbill.shoushua.biz:id/btn_commit_pay") && event.isEnabled()
-                ) {
+                } else if (isInMposPaySignatureActivity) {
                     //  在签名页面 当"提交完成" 按钮改变为可用状态时点击次按钮
-                    AccessibilitySXFOperator.getInstance().commitPay(event);
+                    AccessibilitySXFOperator.getInstance().commitPaySignature(event);
+
                 }
 
                 break;

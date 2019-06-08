@@ -3,13 +3,11 @@ package com.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
@@ -18,12 +16,10 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.accessibility.card.CardListActivity;
 import com.accessibility.card.carddb.CardDatabase;
 import com.accessibility.card.carddb.model.Card;
 import com.accessibility.card.model.TimedPoint;
 import com.accessibility.utils.AccessibilityLog;
-import com.accessibility.utils.Constants;
 import com.accessibility.utils.ToastTool;
 import com.alibaba.fastjson.JSONObject;
 
@@ -175,11 +171,11 @@ public class AccessibilitySXFOperator {
      */
     public void setPay() {
 
-        List<Card>  cards =  cardDatabase.getCardDao().getState1Cards();
+        List<Card> cards = cardDatabase.getCardDao().getState1Cards();
 
         //AccessibilityLog.printLog("card :" + jsonString);
 
-        if (cards ==  null || cards.size() ==0) {
+        if (cards == null || cards.size() == 0) {
             return;
         }
         card = cards.get(0);
@@ -251,11 +247,11 @@ public class AccessibilitySXFOperator {
         //com.vbill.shoushua.biz:id/btn_up_sig
         //com.vbill.shoushua.biz:id/btn_commit_pay
 
-        List<Card>  cards =  cardDatabase.getCardDao().getState1Cards();
+        List<Card> cards = cardDatabase.getCardDao().getState1Cards();
 
         //AccessibilityLog.printLog("card :" + jsonString);
 
-        if (cards ==  null || cards.size() ==0) {
+        if (cards == null || cards.size() == 0) {
             return;
         }
         card = cards.get(0);
@@ -413,7 +409,7 @@ public class AccessibilitySXFOperator {
         //List<AccessibilityNodeInfo> infos = findNodesById("com.vbill.shoushua.biz:id/btn_start_pay");
 
 
-        List<AccessibilityNodeInfo> infos = event.getSource().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/btn_start_pay");
+        List<AccessibilityNodeInfo> infos = findNodesById("com.vbill.shoushua.biz:id/btn_start_pay");
 
         AccessibilityNodeInfo nodeInfoRoot = getRootNodeInfo();
 // 0 0 0 0 1 3
@@ -456,24 +452,42 @@ public class AccessibilitySXFOperator {
         }
     }
 
-    public  void  commitPay(AccessibilityEvent event){
-        AccessibilityLog.printLog("commitPay infos :" + event.getSource().getViewIdResourceName());
+    public void commitPaySignature(AccessibilityEvent event) {
 
-        event.getSource().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//        && className.equals("android.widget.Button")
+//                && id.equals("") && event.isEnabled()
+
+        List<AccessibilityNodeInfo> infos = getRootNodeInfo().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/btn_commit_pay");
+
+        AccessibilityLog.printLog("commitPaySignature infos :" + infos.size());
+
+        for (AccessibilityNodeInfo item : infos) {
+            AccessibilityLog.printLog("commitPaySignature infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName());
+
+            if (item.getClassName().equals("android.widget.Button")
+                    && item.isEnabled()) {
+                AccessibilityLog.printLog("MposPaySignatureActivity in content go : commitPaySignature(event)");
+
+                item.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            }
+
+
+        }
+
+
     }
 
     public void processResult() {
 
-        List<AccessibilityNodeInfo> infos  = getRootNodeInfo().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/tv_pay_result_title");
+        List<AccessibilityNodeInfo> infos = getRootNodeInfo().findAccessibilityNodeInfosByViewId("com.vbill.shoushua.biz:id/tv_pay_result_title");
         AccessibilityLog.printLog("processResult infos :" + infos.size());
 
         for (AccessibilityNodeInfo item : infos) {
-            AccessibilityLog.printLog("processResult infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName() +" text : "+ item
-            .getText());
+            AccessibilityLog.printLog("processResult infos className:" + item.getClassName() + " id:" + item.getViewIdResourceName() + " text : " + item
+                    .getText());
 
 
-
-            ToastTool.show(mContext,item.getText().toString());
+            ToastTool.show(mContext, item.getText().toString());
 
             card.setState(0);
             cardDatabase.getCardDao().updateCard(card);
@@ -489,16 +503,16 @@ public class AccessibilitySXFOperator {
             intent.setClassName(mContext.getPackageName(), "com.accessibility.card.CardListActivity");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            if(item.getText().equals("交易成功")){
+            if (item.getText().equals("交易成功")) {
 
 
-                intent.putExtra("patState","succ");
+                intent.putExtra("patState", "succ");
 
 
-            }else{
+            } else {
 
 
-                intent.putExtra("patState","fail");
+                intent.putExtra("patState", "fail");
             }
 
             mContext.startActivity(intent);
